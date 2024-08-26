@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 from pathlib import Path
 
@@ -13,7 +12,13 @@ def convert_latex_to_html(latex_file, output_dir):
     # https://math.nist.gov/~BMiller/LaTeXML/ussage.html
     content = (
         subprocess.check_output(
-            ["latexmlc", "--format=html", "--nodefaultresources", latex_file]
+            [
+                "latexmlc",
+                "--format=html",
+                "--nodefaultresources",
+                "--whatsout=fragment",
+                latex_file,
+            ]
         )
         .decode()
         .strip()
@@ -28,11 +33,6 @@ def convert_latex_to_html(latex_file, output_dir):
         + "\n"
     )
     front_matter += "---\n\n"
-
-    # Extract the body content
-    body_content = re.search("<body>(.*?)</body>", content, re.DOTALL)
-    if body_content:
-        content = body_content.group(1)
 
     # Merge front matter and body content
     final_content = front_matter + content
