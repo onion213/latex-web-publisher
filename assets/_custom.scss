@@ -1,0 +1,4 @@
+// don't show borders in equation table
+.markdown table tr td.ltx_eqn_cell {
+    border: none;
+}
