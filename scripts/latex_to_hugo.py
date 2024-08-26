@@ -1,6 +1,6 @@
 import os
-import subprocess
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -11,11 +11,13 @@ def convert_latex_to_html(latex_file, output_dir):
     #
     # NOTE: latexmlc command may be combined to latexml command in the future. See below.
     # https://math.nist.gov/~BMiller/LaTeXML/ussage.html
-    subprocess.run(["latexmlc", latex_file, "--destination=" + output_path])
-
-    # Load the converted HTML file
-    with open(output_path, "r") as f:
-        content = f.read()
+    content = (
+        subprocess.check_output(
+            ["latexmlc", "--format=html", "--nodefaultresources", latex_file]
+        )
+        .decode()
+        .strip()
+    )
 
     # Add front matter of Hugo
     front_matter = "---\n"
@@ -40,6 +42,12 @@ def convert_latex_to_html(latex_file, output_dir):
         f.write(final_content)
 
 
+def remove_generated_css_file(output_dir):
+    for file in os.listdir(output_dir):
+        if file.endswith(".css"):
+            os.remove(os.path.join(output_dir, file))
+
+
 def process_latex_files(src_dir, output_dir):
     for root, dirs, files in os.walk(src_dir):
         for file in files:
@@ -51,6 +59,7 @@ def process_latex_files(src_dir, output_dir):
                 Path(output_subdir).mkdir(parents=True, exist_ok=True)
 
                 convert_latex_to_html(latex_file, output_subdir)
+                remove_generated_css_file(output_dir)
 
 
 if __name__ == "__main__":
